@@ -1,0 +1,11 @@
+{
+  "name": "auto-tools",
+  "version": "0.0.1",
+  "dependencies": [
+    "my-windows",
+    "gtest",
+    {
+      "name": "opencv"
+    }
+  ]
+}

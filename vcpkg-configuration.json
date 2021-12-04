@@ -1,0 +1,12 @@
+{
+    "registries": [
+        {
+            "kind": "git",
+            "repository": "https://github.com/Chaojimengnan/lomekragow-registry",
+            "baseline": "e328c72468c3841f992e6158535faa63f284282c",
+            "packages": [
+                "my-windows"
+            ]
+        }
+    ]
+}

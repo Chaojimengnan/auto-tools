@@ -14,13 +14,13 @@ namespace at {
 		/// 等待信号，它用于指定等待一段时间
 		static constexpr int wait_sign = 10086;
 
-		enum class move_type
+		enum class move_type :int
 		{
 			linear,
 			smooth
 		};
 
-		enum class mouse_button_type {
+		enum class mouse_button_type :int {
 			/// 鼠标左键
 			left,
 			/// 鼠标右键
@@ -35,7 +35,7 @@ namespace at {
 			double_middle
 		};
 
-		enum class click_type {
+		enum class click_type :int {
 			/// 按下
 			down,
 			/// 弹起
@@ -243,6 +243,21 @@ namespace at {
 		}
 
 		/// <summary>
+		/// 按下并弹起一系列指定键盘按键，根据列表元素的先后顺序来按下和弹起指定按键
+		/// </summary>
+		/// <param name="buttons_list">按键列表，该函数会按其顺序按下和弹起指定键盘按键</param>
+		/// <param name="interval">按下和弹起的间隔时间</param>
+		/// <returns>操作是否成功</returns>
+		bool press(std::initializer_list<const char*> buttons_name_list, int interval = 20)
+		{
+			bool is_ok = true;
+			for (auto&& b : buttons_name_list)
+				is_ok = is_ok && press(enum_mapping(b), interval);
+			return is_ok;
+		}
+
+
+		/// <summary>
 		/// 按下指定键盘按键(但不弹起)
 		/// </summary>
 		/// <param name="buttons">指定按钮，它应该是VK_开头的宏，或是字符'0'到'9'或'A'到'Z'，后者指定对应的键盘数字和字母，注意不要是小写</param>
@@ -263,7 +278,7 @@ namespace at {
 		/// </summary>
 		/// <param name="millisecond">需要等待的毫秒数</param>
 		/// <returns>操作是否成功</returns>
-		bool wait(int millisecond = 1000) { 
+		bool wait(int millisecond = 1000) {
 			if (is_record)
 			{
 				INPUT wait_input = { 0 };
@@ -271,7 +286,7 @@ namespace at {
 				wait_input.mi.dx = millisecond;
 				temp_list.push_back(wait_input);
 			}
-			mw::sleep(millisecond); 
+			mw::sleep(millisecond);
 			return true;
 		}
 
@@ -312,6 +327,104 @@ namespace at {
 		bool is_record = false;
 
 		input_list temp_list;
+
+	public:
+		struct enum_value_type {
+			enum_value_type(int val) :val(val) {};
+			int val;
+			operator mouse_button_type() const {
+				return mouse_button_type(val);
+			}
+			operator click_type() const {
+				return click_type(val);
+			}
+			operator WORD() const {
+				return WORD(val);
+			}
+		};
+
+		/// <summary>
+		/// 将对应的枚举类型的字符串映射为枚举类型的值
+		/// </summary>
+		/// <param name="enum_name">指定的枚举名字</param>
+		/// <returns>若成功，返回指定枚举名字对应的枚举值，否则返回-1</returns>
+		static enum_value_type enum_mapping(const std::string& enum_name)
+		{
+			static const std::unordered_map<std::string, int> _input_type_mapping_dict = {
+				{"left", (int)mouse_button_type::left},
+				{"right", (int)mouse_button_type::right},
+				{"middle", (int)mouse_button_type::middle},
+				{"double_left", (int)mouse_button_type::double_left},
+				{"double_right", (int)mouse_button_type::double_right},
+				{"double_middle", (int)mouse_button_type::double_middle},
+				{"down", (int)click_type::down},
+				{"up", (int)click_type::up},
+				{"up_and_down", (int)click_type::down_and_up},
+
+				// 键盘
+				{"back", VK_BACK},
+				{"tab", VK_TAB},
+				{"enter", VK_RETURN},
+				{"shift", VK_SHIFT},
+				{"ctrl", VK_CONTROL},
+				{"alt", VK_MENU},
+				{"pause", VK_PAUSE},
+				{"caps_lock", VK_CAPITAL},
+				{"esc", VK_ESCAPE},
+				{"space", VK_SPACE},
+				{"page_up", VK_PRIOR},
+				{"page_down", VK_NEXT},
+				{"end", VK_END},
+				{"home", VK_HOME},
+				{"arrow_left", VK_LEFT},
+				{"arrow_up", VK_UP},
+				{"arrow_right", VK_RIGHT},
+				{"arrow_down", VK_DOWN},
+				{"print", VK_PRINT},
+				{"insert", VK_INSERT},
+				{"delete", VK_DELETE},
+				{"A", 'A'},{"B", 'B'},{"C", 'C'},{"D", 'D'},{"E", 'E'},
+				{"F", 'F'},{"G", 'G'},{"H", 'H'},{"I", 'I'},{"J", 'J'},
+				{"K", 'K'},{"L", 'L'},{"M", 'M'},{"N", 'N'},{"O", 'O'},
+				{"P", 'P'},{"Q", 'Q'},{"R", 'R'},{"S", 'S'},{"T", 'T'},
+				{"U", 'U'},{"V", 'V'},{"W", 'W'},{"X", 'X'},{"Y", 'Y'},
+				{"Z", 'Z'},
+				{"a", 'A'},{"b", 'B'},{"c", 'C'},{"d", 'D'},{"e", 'E'},
+				{"f", 'F'},{"g", 'G'},{"h", 'H'},{"i", 'I'},{"j", 'J'},
+				{"k", 'K'},{"l", 'L'},{"m", 'M'},{"n", 'N'},{"o", 'O'},
+				{"p", 'P'},{"q", 'Q'},{"r", 'R'},{"s", 'S'},{"t", 'T'},
+				{"u", 'U'},{"v", 'V'},{"w", 'W'},{"x", 'X'},{"y", 'Y'},
+				{"z", 'Z'},
+				{"0", '0'},{"1", '1'},{"2", '2'},{"3", '3'},{"4", '4'},
+				{"5", '5'},{"6", '6'},{"7", '7'},{"8", '8'},{"9", '9'},
+				{"num0", VK_NUMPAD0},{"num1", VK_NUMPAD1},{"num2", VK_NUMPAD2},{"num3", VK_NUMPAD3},{"num4", VK_NUMPAD4},
+				{"num5", VK_NUMPAD5},{"num6", VK_NUMPAD6},{"num7", VK_NUMPAD7},{"num8", VK_NUMPAD8},{"num9", VK_NUMPAD9},
+				{"win_left", VK_LWIN},
+				{"win_right", VK_RWIN},
+				{"f1", VK_F1},{"f2", VK_F2},{"f3", VK_F3},{"f4", VK_F4},{"f5", VK_F5},
+				{"f6", VK_F6},{"f7", VK_F7},{"f8", VK_F8},{"f9", VK_F9},{"f10", VK_F10},
+				{"f11", VK_F11},{"f12", VK_F12},
+				{"num_lock", VK_NUMLOCK},
+				{"scroll_lock", VK_SCROLL},
+				{"+", VK_OEM_PLUS},
+				{",", VK_OEM_COMMA},
+				{"-", VK_OEM_MINUS},
+				{".", VK_OEM_PERIOD},
+				{";", VK_OEM_1},
+				{"/", VK_OEM_2},
+				{"`", VK_OEM_3},
+				{"[", VK_OEM_4},
+				{"\\", VK_OEM_5},
+				{"]", VK_OEM_6},
+				{"'", VK_OEM_7}
+			};
+
+			auto iter = _input_type_mapping_dict.find(enum_name);
+
+			if (iter == _input_type_mapping_dict.end())
+				return -1;
+			else return iter->second;
+		};
 	};
 };//at
 
